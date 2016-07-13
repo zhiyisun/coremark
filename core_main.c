@@ -20,37 +20,6 @@ El Dorado Hills, CA, 95762
 	This file contains the framework to acquire a block of memory, seed initial parameters, tun t he benchmark and report the results.
 */
 #include "coremark.h"
-#include <sys/syscall.h>
-#include <linux/perf_event.h>
-
-/* MAX common event id for ARMv7 is 0x1D.
- * For ARMv8 is 0x30.*/
-#define MAX_COMMON_EVENT_ID 0x30
-
-static int fddev = -1;
-
-/* Function: Enable PMU count on hardware */
-static void init_pmu(unsigned int event_id)
-{
-	static struct perf_event_attr attr;
-	attr.type = PERF_TYPE_RAW;
-	attr.config = event_id;
-	fddev = syscall(__NR_perf_event_open, &attr, 0, -1, -1, 0);
-}
-
-/* Function: Disable PMU count on hardware */
-static void fini_pmu(void)
-{
-	close(fddev);
-}
-
-/* Function: Get PMU counter from hardware */
-static inline long long get_pmu(void)
-{
-	long long result = 0;
-	if (read(fddev, &result, sizeof(result)) < sizeof(result)) return 0;
-	return result;
-}
 
 /* Function: iterate
 	Run the benchmark for a specified number of iterations.
@@ -242,13 +211,13 @@ MAIN_RETURN_TYPE main(int argc, char *argv[]) {
 			divisor=1;
 		results[0].iterations*=1+10/divisor;
 	}
-
+#ifdef GET_PMU
 	unsigned int id;
 	for(id = 0; id <= MAX_COMMON_EVENT_ID; id++)
 	{
-		init_pmu(id);
-		long long cnt_start = get_pmu();
-
+		ee_s32 fddev = init_pmu(id);
+		long long cnt_start = get_pmu(fddev);
+#endif
 		/* perform actual benchmark */
 		start_time();
 #if (MULTITHREAD>1)
@@ -268,11 +237,13 @@ MAIN_RETURN_TYPE main(int argc, char *argv[]) {
 #endif
 		stop_time();
 
-		long long cnt_stop = get_pmu();
-		fini_pmu();
+#ifdef GET_PMU
+		long long cnt_stop = get_pmu(fddev);
+		fini_pmu(fddev);
 
 		ee_printf("PMU Event Name 0x%03x: %llu - %llu = %llu\n", id, cnt_stop, cnt_start, cnt_stop - cnt_start);
 	}
+#endif
 
 	total_time=get_time();
 	/* get a function of the input to report */

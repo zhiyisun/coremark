@@ -115,4 +115,22 @@ void portable_fini(core_portable *p)
 	p->portable_id=0;
 }
 
+#ifdef GET_PMU
+/* Function: Enable PMU count on hardware */
+ee_s32 init_pmu(ee_u32 event_id)
+{
+	#error "You must implement a method to enable PMU events on hardware! This function should return device handler.\n"
+}
 
+/* Function: Disable PMU count on hardware */
+void fini_pmu(ee_s32 fddev)
+{
+	#error "You must implement a method to disable PMU events on hardware!\n"
+}
+
+/* Function: Get PMU counter from hardware */
+long long get_pmu(ee_s32 fddev)
+{
+	#error "You must implement a method to get PMU events on hardware! This function should return pmu event counter.\n"
+}
+#endif

@@ -11,6 +11,11 @@
 #if CALLGRIND_RUN
 #include <valgrind/callgrind.h>
 #endif
+#ifdef GET_PMU
+#include <sys/syscall.h>
+#include <linux/perf_event.h>
+#endif
+
 
 #if (MEM_METHOD==MEM_MALLOC)
 #include <malloc.h>
@@ -324,4 +329,30 @@ ee_u8 core_stop_parallel(core_results *res) {
 #else /* no standard multicore implementation */
 #error "Please implement multicore functionality in core_portme.c to use multiple contexts."
 #endif /* multithread implementations */
+
+#endif
+
+#ifdef GET_PMU
+/* Function: Enable PMU count on hardware */
+ee_s32 init_pmu(ee_u32 event_id)
+{
+	static struct perf_event_attr attr;
+	attr.type = PERF_TYPE_RAW;
+	attr.config = event_id;
+	return syscall(__NR_perf_event_open, &attr, 0, -1, -1, 0);
+}
+
+/* Function: Disable PMU count on hardware */
+void fini_pmu(ee_s32 fddev)
+{
+	close(fddev);
+}
+
+/* Function: Get PMU counter from hardware */
+long long get_pmu(ee_s32 fddev)
+{
+	long long result = 0;
+	if (read(fddev, &result, sizeof(result)) < sizeof(result)) return 0;
+	return result;
+}
 #endif

@@ -278,4 +278,14 @@ void portable_fini(core_portable *p);
  #endif
 #endif /* SEED_METHOD==SEED_VOLATILE */
 
+#ifdef GET_PMU
+/* MAX common event id for ARMv7 is 0x1D.
+ * For ARMv8 is 0x30.*/
+#define MAX_COMMON_EVENT_ID 0x30
+
+ee_s32 init_pmu(ee_u32 event_id);
+void fini_pmu(ee_s32 fddev);
+long long get_pmu(ee_s32 fddev);
+#endif
+
 #endif /* CORE_PORTME_H */
