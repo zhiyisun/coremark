@@ -216,6 +216,12 @@ MAIN_RETURN_TYPE main(int argc, char *argv[]) {
 	for(id = 0; id <= MAX_COMMON_EVENT_ID; id++)
 	{
 		ee_s32 fddev = init_pmu(id);
+		if(fddev < 0)
+		{
+			ee_printf("Failed access PMU events!\n");
+			return MAIN_RETURN_VAL;
+		}
+
 		long long cnt_start = get_pmu(fddev);
 #endif
 		/* perform actual benchmark */
