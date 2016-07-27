@@ -213,9 +213,19 @@ MAIN_RETURN_TYPE main(int argc, char *argv[]) {
 	}
 #ifdef GET_PMU
 	unsigned int id;
-	for(id = 0; id <= MAX_COMMON_EVENT_ID; id++)
+        unsigned int event_id_array[MAX_COMMON_EVENT_ID] = {0x000, 0x001, 0x002, 0x003, 0x004, 0x005, 0x008, 0x009, 0x00A, 0x00B, 
+                                                            0x010, 0x011, 0x012, 0x013, 0x014, 0x016, 0x017, 0x018, 0x019, 0x01A, 
+                                                            0x01B, 0x01C, 0x01E, 0x040, 0x041, 0x042, 0x048, 0x04C, 0x050, 0x051, 
+                                                            0x052, 0x053, 0x056, 0x057, 0x058, 0x060, 0x061, 0x062, 0x063, 0x064, 
+                                                            0x065, 0x066, 0x067, 0x068, 0x069, 0x06A, 0x06C, 0x06D, 0x06E, 0x06F, 
+                                                            0x070, 0x071, 0x072, 0x073, 0x074, 0x075, 0x076, 0x078, 0x079, 0x07A, 
+                                                            0x07C, 0x07D, 0x07E, 0x081, 0x082, 0x083, 0x084, 0x086, 0x087, 0x08A, 
+                                                            0x08B, 0x08C, 0x08D, 0x08E, 0x08F, 0x090, 0x091, 0x100, 0x101, 0x102, 
+                                                            0x103, 0x104, 0x105, 0x106, 0x107, 0x108, 0x109, 0x10A, 0x10B, 0x10C, 
+                                                            0x10D, 0x10E, 0x10F, 0x110, 0x111, 0x112, 0x113, 0x114, 0x115, 0x116};
+	for(id = 0; id <= (MAX_COMMON_EVENT_ID - 1); id++)
 	{
-		ee_s32 fddev = init_pmu(id);
+		ee_s32 fddev = init_pmu(event_id_array[id]);
 		if(fddev < 0)
 		{
 			ee_printf("Failed access PMU events!\n");
@@ -247,7 +257,7 @@ MAIN_RETURN_TYPE main(int argc, char *argv[]) {
 		long long cnt_stop = get_pmu(fddev);
 		fini_pmu(fddev);
 
-		ee_printf("PMU Event Name 0x%03x: %llu - %llu = %llu\n", id, cnt_stop, cnt_start, cnt_stop - cnt_start);
+		ee_printf("PMU Event Name 0x%03x: %llu - %llu = %llu\n", event_id_array[id], cnt_stop, cnt_start, cnt_stop - cnt_start);
 	}
 #endif
 
